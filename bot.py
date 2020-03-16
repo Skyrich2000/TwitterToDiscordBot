@@ -9,7 +9,7 @@ import threading
 import os
 
 typemap = [0b001, 0b010, 0b100]
-typemsg = ["님이 누른 마음중 사진만 불러옵니다.", "님의 트윗을 불러옵니다.", "님의 트윗중 사진만 불러옵니다."]
+typemsg = ["님이 누른 마음중 미디어만 불러옵니다.", "님의 트윗을 불러옵니다.", "님의 트윗중 미디어만 불러옵니다."]
 
 class MyClient(discord.Client):
     async def on_ready(self):
@@ -32,23 +32,34 @@ class MyClient(discord.Client):
     async def update(self):
         def send():
             for id in sys.data.usertable:
+                errorlist = []
                 embedlist = []
                 for data in sys.data.usertable[id]['print']: #create embed
+                    #embed = ''
+                    #isem = False
+                    #if data['title'] == '':
+                    #    embed = data['des']
+                    #    isem = False
+                    #else :
                     embed = discord.Embed(title=data['title'], description=data['des']) #color=0x00ff00)
                     embed.set_image(url=data['pic_url'])
                     embed.set_footer(text=data['url'])
-                    embedlist.append([data['type'], embed])
+                    #    isem = True
+                    embedlist.append([data['type'], embed]) #, isem])
                 sys.data.usertable[id]['print'] = []
 
                 for ch in sys.data.usertable[id]['channel']: #send embed
                     _ch = client.get_channel(int(ch))
                     if _ch == None: #if no channel
                         self.print_log(f"<span style='color:red'>Bot Send Error - {tstr} | Not Exist Channel {ch} | {sys.data.get_user_screen_name(id)}</span>")
-                        sys._del(ch, sys.data.get_user_screen_name(id))
+                        errorlist.append([ch, sys.data.get_user_screen_name(id)])
                     else :
                         for em in embedlist:
                             if sys.data.get_type(id, ch) & em[0]:
-                                yield _ch, em[1]
+                                yield _ch, em[1] #, em[2]
+                for d in errorlist:
+                    sys._del(d[0], d[1])
+
             sys.data.save()
         await self.wait_until_ready()
         while not self.is_closed():
@@ -59,10 +70,13 @@ class MyClient(discord.Client):
             await asyncio.sleep(self.sleeptime)
             #Send Start
             s = time.time()
-            for _ch, em in send():
-                try: await _ch.send(embed=em)                                
-                except Exception as e:
-                    self.print_log(f"<span style='color:red'>Bot Send Error - {tstr} | {e} | {sys.data.get_user_screen_name(id)}</span>")
+            try:
+                for _ch, em in send():
+                    await _ch.send(embed=em)
+                    #if isem : await _ch.send(embed=em)
+                    #else : await _ch.send(em)
+            except Exception as e:
+                self.print_log(f"<span style='color:red'>Bot Send Error - {tstr} | {e} | {sys.data.get_user_screen_name(id)}</span>")
             temp = os.popen("vcgencmd measure_temp").readline().replace("temp=","").replace('\n',"")
             self.print_log(f"<b>Bot - {tstr} | {round(time.time() - s, 2)}sec | Cpu {temp} | Send end | Wait {self.sleeptime}sec</b>")
             #Cycle
@@ -79,7 +93,7 @@ class MyClient(discord.Client):
 
         try : 
             if message.content == "@help":
-                st = '''트위터에서 마음찍은 사진들을 불러옵니다!
+                st = '''트윗들을 불러옵니다!
                 @list : 계정 목록 확인
                 @add 트위터 아이디 : 트위터 계정 추가
                 @del 트위터 아이디 : 트위터 계정 제거
@@ -110,9 +124,9 @@ class MyClient(discord.Client):
             if message.content.startswith('@add'): #예외 - 등록X 계정, 이미 추가
                 msg = message.content.split(" ")[1]
                 name = sys._add(str(message.channel.id), msg)
-                des = """1 - 마음중 사진을 불러옵니다.
+                des = """1 - 마음중 미디어를 불러옵니다.
                 2 - 트윗을 불러옵니다.
-                3 - 트윗중 사진만 불러옵니다."""
+                3 - 트윗중 미디어만 불러옵니다."""
                 embed = discord.Embed(title=f"{name} 님의 무엇을 불러오시겠어요?", description=des)
                 await message.channel.send(embed=embed)
 
@@ -207,4 +221,4 @@ sys = getpic.Main()
 client = MyClient()
 th = MyThread()
 threading.Thread(target=th.run).start()
-client.run('')
+client.run('NjgxOTA1NzQzODU4NzYxNzQ3.XlVQXQ.rSqAjGHzuenmG5a7ii5wUw5xW0o')

@@ -223,10 +223,23 @@ class Main():
         def append(value, state):
             if not 'media_url' in value:
                 raise Exception(f'No media_url in media :  {value}')
+
             des = ""
             if st == "likes" : 
                 des = state['user']['name'] + '  @'+state['user']['screen_name']
-            self.data.add_print(id, {'type' : _typemap[st][1], 'title' : f'{self.data.get_user_name(id=id)} 님{_titlemap[st]}', 'des': des, 'pic_url': value['media_url'], 'url': value['display_url']})
+
+            adddes = ""
+            if 'video_info' in value:
+                for a in value['video_info']['variants']:
+                    if 'bitrate' in a:
+                        name = 'link'
+                        if len(a["url"].split("/")) >= 7:
+                            name = a["url"].split("/")[7]
+                        adddes += f'{chr(10)} [{name}]({a["url"]})'
+                    #self.data.add_print(id, {'type': _typemap[st][1], 'title': '', 'des': des, 'pic_url': '', 'url': ''})
+            
+            self.data.add_print(id, {'type': _typemap[st][1], 'title': f'{self.data.get_user_name(id=id)} 님{_titlemap[st]}',
+                                     'des': des + adddes, 'pic_url': value['media_url'], 'url': value['display_url']})
 
         if not self.data.get_user_protected(id):
             for state in Twitter(id=id).get_tweets(st):
