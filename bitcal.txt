@@ -1,0 +1,24 @@
+print type
+마음	001
+트윗사진	110
+트윗text	100
+
+사용자 type
+없음 		000
+마음만 		001
+트윗전체		100
+트윗사진만 	010
+마음 + 트윗전체 	101
+마음 + 트윗사진 	011
+
+newtype
+마음 		001
+트윗 전체		010
+트윗 사진 		100
+
+사용자type & 0b110
+
+if 사용자 type & new type 이미 있음
+사용자 type = (사용자type & 0b001) | new type
+
+if print type & 사용자 type 출력
