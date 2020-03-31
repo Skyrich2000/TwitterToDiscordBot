@@ -235,7 +235,7 @@ class Main():
                         name = 'link'
                         if len(a["url"].split("/")) >= 7:
                             name = a["url"].split("/")[7]
-                        adddes += f'{chr(10)} [{name}]({a["url"]})'
+                        adddes += f'[{name}]({a["url"]}) '
                     #self.data.add_print(id, {'type': _typemap[st][1], 'title': '', 'des': des, 'pic_url': '', 'url': ''})
             
             self.data.add_print(id, {'type': _typemap[st][1], 'title': f'{self.data.get_user_name(id=id)} 님{_titlemap[st]}',
